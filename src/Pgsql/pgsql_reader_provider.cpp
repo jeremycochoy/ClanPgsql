@@ -30,10 +30,10 @@
 #include "pgsql_reader_provider.h"
 #include "pgsql_connection_provider.h"
 #include "pgsql_command_provider.h"
-#include "API/Core/System/databuffer.h"
-#include "API/Core/System/datetime.h"
-#include "API/Core/Text/string_help.h"
-#include "API/Core/Text/string_format.h"
+#include "ClanLib/Core/System/databuffer.h"
+#include "ClanLib/Core/System/datetime.h"
+#include "ClanLib/Core/Text/string_help.h"
+#include "ClanLib/Core/Text/string_format.h"
 #include <libpq-fe.h>
 #include <cstdlib>
 

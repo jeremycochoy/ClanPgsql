@@ -27,7 +27,7 @@
 */
 
 #include "Pgsql/precomp.h"
-#include "API/Pgsql/pgsql_connection.h"
+#include "ClanLib/Pgsql/pgsql_connection.h"
 #include "pgsql_connection_provider.h"
 
 /////////////////////////////////////////////////////////////////////////////

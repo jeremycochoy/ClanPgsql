@@ -34,7 +34,7 @@
 
 
 #include <libpq-fe.h>
-#include "API/Database/db_reader_provider.h"
+#include "ClanLib/Database/db_reader_provider.h"
 
 class CL_PgsqlCommandProvider;
 class CL_PgsqlConnectionProvider;

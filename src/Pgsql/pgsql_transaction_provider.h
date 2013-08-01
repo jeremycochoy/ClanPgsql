@@ -33,8 +33,8 @@
 #pragma once
 
 #include <libpq-fe.h>
-#include "API/Database/db_transaction.h"
-#include "API/Database/db_transaction_provider.h"
+#include "ClanLib/Database/db_transaction.h"
+#include "ClanLib/Database/db_transaction_provider.h"
 
 class CL_PgsqlConnectionProvider;
 

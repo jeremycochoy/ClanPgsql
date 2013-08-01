@@ -37,9 +37,9 @@
 
 #include <libpq-fe.h>
 
-#include "API/Core/Text/string_types.h"
-#include "API/Core/System/exception.h"
-#include "API/Core/System/sharedptr.h"
+#include "ClanLib/Core/Text/string_types.h"
+#include "ClanLib/Core/System/exception.h"
+#include "ClanLib/Core/System/sharedptr.h"
 
 #ifdef __BORLANDC__
 #define BAD_MATH

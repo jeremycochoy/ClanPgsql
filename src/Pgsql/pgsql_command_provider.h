@@ -36,9 +36,9 @@
 #include <map>
 
 #include <libpq-fe.h>
-#include "API/Database/db_command_provider.h"
-#include "API/Core/System/uniqueptr.h"
-#include "API/Core/System/databuffer.h"
+#include "ClanLib/Database/db_command_provider.h"
+#include "ClanLib/Core/System/uniqueptr.h"
+#include "ClanLib/Core/System/databuffer.h"
 
 class CL_PgsqlConnectionProvider;
 

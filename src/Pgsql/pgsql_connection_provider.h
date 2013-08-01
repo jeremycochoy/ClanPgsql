@@ -34,8 +34,8 @@
 
 
 #include <libpq-fe.h>
-#include "API/Pgsql/pgsql_connection.h"
-#include "API/Database/db_connection_provider.h"
+#include "ClanLib/Pgsql/pgsql_connection.h"
+#include "ClanLib/Database/db_connection_provider.h"
 
 class CL_PgsqlTransactionProvider;
 class CL_PgsqlReaderProvider;

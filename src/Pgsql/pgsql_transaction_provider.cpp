@@ -29,10 +29,10 @@
 #include "Pgsql/precomp.h"
 #include "pgsql_transaction_provider.h"
 #include "pgsql_connection_provider.h"
-#include "API/Database/db_command_provider.h"
-#include "API/Core/System/databuffer.h"
-#include "API/Core/System/uniqueptr.h"
-#include "API/Core/Text/string_help.h"
+#include "ClanLib/Database/db_command_provider.h"
+#include "ClanLib/Core/System/databuffer.h"
+#include "ClanLib/Core/System/uniqueptr.h"
+#include "ClanLib/Core/Text/string_help.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CL_PgsqlTransactionProvider Construction:
