@@ -30,28 +30,33 @@
 #include "ClanLib/Pgsql/pgsql_connection.h"
 #include "pgsql_connection_provider.h"
 
-/////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlConnection Construction:
+namespace clan
+{
 
-CL_PgsqlConnection::CL_PgsqlConnection(const CL_PgsqlConnection::Parameters &parameters)
-: CL_DBConnection(new CL_PgsqlConnectionProvider(parameters))
+/////////////////////////////////////////////////////////////////////////////
+// PgsqlConnection Construction:
+
+PgsqlConnection::PgsqlConnection(const PgsqlConnection::Parameters &parameters)
+: DBConnection(new PgsqlConnectionProvider(parameters))
 {
 }
 
-CL_PgsqlConnection::CL_PgsqlConnection(const CL_String &connection_string)
-: CL_DBConnection(new CL_PgsqlConnectionProvider(connection_string))
+PgsqlConnection::PgsqlConnection(const std::string &connection_string)
+: DBConnection(new PgsqlConnectionProvider(connection_string))
 {
 }
 
-CL_PgsqlConnection::~CL_PgsqlConnection()
+PgsqlConnection::~PgsqlConnection()
 {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CL_DBConnection Attributes:
+// DBConnection Attributes:
 
 /////////////////////////////////////////////////////////////////////////////
-// CL_DBConnection Operations:
+// DBConnection Operations:
 
 /////////////////////////////////////////////////////////////////////////////
-// CL_DBConnection Implementation:
+// DBConnection Implementation:
+
+}; // namespace clan
