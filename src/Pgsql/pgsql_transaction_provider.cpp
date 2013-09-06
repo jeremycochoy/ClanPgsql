@@ -31,31 +31,33 @@
 #include "pgsql_connection_provider.h"
 #include "ClanLib/Database/db_command_provider.h"
 #include "ClanLib/Core/System/databuffer.h"
-#include "ClanLib/Core/System/uniqueptr.h"
 #include "ClanLib/Core/Text/string_help.h"
 
-/////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlTransactionProvider Construction:
+namespace clan
+{
 
-CL_PgsqlTransactionProvider::CL_PgsqlTransactionProvider(CL_PgsqlConnectionProvider *connection, const CL_DBTransaction::Type type)
+/////////////////////////////////////////////////////////////////////////////
+// PgsqlTransactionProvider Construction:
+
+PgsqlTransactionProvider::PgsqlTransactionProvider(PgsqlConnectionProvider *connection, const DBTransaction::Type type)
 : connection(connection), type(type)
 {
 	//We assert that (connection != nullptr)
 	if (connection->active_transaction)
-		throw CL_Exception("Only one database transaction may be active for a connection");
-	CL_String transaction_type;
+		throw Exception("Only one database transaction may be active for a connection");
+	std::string transaction_type;
 	switch (type)
 	{
-	case CL_DBTransaction::deferred:
+	case DBTransaction::deferred:
 		transaction_type = "SET CONSTRAINTS ALL DEFERRED;";
 		break;
-	case CL_DBTransaction::immediate:
+	case DBTransaction::immediate:
 		transaction_type = "SET CONSTRAINTS ALL IMMEDIATE;";
 		break;
-	case CL_DBTransaction::default_transaction:
+	case DBTransaction::default_transaction:
 		break;
 	default:
-		throw CL_Exception("Unknown transaction type");
+		throw Exception("Unknown transaction type");
 	}
 	execute("START TRANSACTION;");
 	if (!transaction_type.empty())
@@ -63,7 +65,7 @@ CL_PgsqlTransactionProvider::CL_PgsqlTransactionProvider(CL_PgsqlConnectionProvi
 	connection->active_transaction = this;
 }
 
-CL_PgsqlTransactionProvider::~CL_PgsqlTransactionProvider()
+PgsqlTransactionProvider::~PgsqlTransactionProvider()
 {
 	rollback();
 	if (connection)
@@ -71,13 +73,13 @@ CL_PgsqlTransactionProvider::~CL_PgsqlTransactionProvider()
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlTransactionProvider Attributes:
+// PgsqlTransactionProvider Attributes:
 
 
 /////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlTransactionProvider Operations:
+// PgsqlTransactionProvider Operations:
 
-void CL_PgsqlTransactionProvider::commit()
+void PgsqlTransactionProvider::commit()
 {
 	//We assert that (connection != nullptr) and (connection->active_transaction == this|nullptr)
 	if (connection->active_transaction)
@@ -87,7 +89,7 @@ void CL_PgsqlTransactionProvider::commit()
 	}
 }
 
-void CL_PgsqlTransactionProvider::rollback()
+void PgsqlTransactionProvider::rollback()
 {
 	//We assert that (connection != nullptr) and (connection->active_transaction == this|nullptr)
 	if (connection->active_transaction)
@@ -98,15 +100,17 @@ void CL_PgsqlTransactionProvider::rollback()
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlTransactionProvider Implementation:
+// PgsqlTransactionProvider Implementation:
 
 inline
-void CL_PgsqlTransactionProvider::execute(const CL_String &cmd)
+void PgsqlTransactionProvider::execute(const std::string &cmd)
 {
-	CL_UniquePtr<CL_DBCommandProvider> command(
+	std::unique_ptr<DBCommandProvider> command(
 		connection->create_command(
 			cmd,
-			CL_DBCommand::sql_statement)
+			DBCommand::sql_statement)
 		);
 	connection->execute_non_query(command.get());
 }
+
+}; // namespace clan

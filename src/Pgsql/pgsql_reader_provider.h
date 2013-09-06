@@ -36,34 +36,37 @@
 #include <libpq-fe.h>
 #include "ClanLib/Database/db_reader_provider.h"
 
-class CL_PgsqlCommandProvider;
-class CL_PgsqlConnectionProvider;
+namespace clan
+{
+
+class PgsqlCommandProvider;
+class PgsqlConnectionProvider;
 
 /// \brief Pgsql database reader provider.
-class CL_PgsqlReaderProvider : public CL_DBReaderProvider
+class PgsqlReaderProvider : public DBReaderProvider
 {
 /// \name Construction
 /// \{
 public:
-	CL_PgsqlReaderProvider(CL_PgsqlConnectionProvider *connection, CL_PgsqlCommandProvider *command);
-	~CL_PgsqlReaderProvider();
+	PgsqlReaderProvider(PgsqlConnectionProvider *connection, PgsqlCommandProvider *command);
+	~PgsqlReaderProvider();
 /// \}
 
 /// \name Attributes
 /// \{
 public:
 	int get_column_count() const;
-	CL_String get_column_name(int index) const;
-	int get_name_index(const CL_StringRef &name) const;
-	CL_String get_column_string(int index) const;
+	std::string get_column_name(int index) const;
+	int get_name_index(const std::string &name) const;
+	std::string get_column_string(int index) const;
 	bool get_column_bool(int index) const;
 	char get_column_char(int index) const;
 	unsigned char get_column_uchar(int index) const;
 	int get_column_int(int index) const;
 	unsigned int get_column_uint(int index) const;
 	double get_column_double(int index) const;
-	CL_DateTime get_column_datetime(int index) const;
-	CL_DataBuffer get_column_binary(int index) const;
+	DateTime get_column_datetime(int index) const;
+	DataBuffer get_column_binary(int index) const;
 /// \}
 
 /// \name Operations
@@ -82,18 +85,19 @@ private:
 		TUPLES_RESULT
 	};
 
-	CL_PgsqlConnectionProvider *connection;
-	CL_PgsqlCommandProvider *command;
+	PgsqlConnectionProvider *connection;
+	PgsqlCommandProvider *command;
 	PGresult *result;
 	ResultType type;
 	bool closed;
 	int current_row;
 	int nb_rows;
 
-	friend class CL_PgsqlConnectionProvider;
-	friend class CL_PgsqlCommandProvider;
+	friend class PgsqlConnectionProvider;
+	friend class PgsqlCommandProvider;
 /// \}
 };
 
+};
 
 /// \}

@@ -6,8 +6,8 @@ option(BUILD_DYNAMIC "Tell if the dynamic library should be compiled" ON)
 option(BUILD_DEBUG "Should we add debug flags?" OFF)
 option(BUILD_DOC "Tell if the doc target should be added" ON)
 
-set(ClanLib_MAJOR_VERSION 2)
-set(ClanLib_MINOR_VERSION 3)
+set(ClanLib_MAJOR_VERSION 3)
+set(ClanLib_MINOR_VERSION 0)
 
 # C++ 2011 flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")

@@ -31,35 +31,40 @@
 
 #pragma once
 
-#include "api_pgsql.h"
-#include "../Database/db_connection.h"
+#include <memory>
 #include <map>
+
+#include "api_pgsql.h"
+#include "ClanLib/Database/db_connection.h"
+
+namespace clan
+{
 
 /// \brief Sqlite database connection.
 ///
 /// \xmlonly !group=Sqlite/System! !header=sqlite.h! \endxmlonly
-class CL_API_PGSQL CL_PgsqlConnection : public CL_DBConnection
+class CL_API_PGSQL PgsqlConnection : public DBConnection
 {
 /// \name Construction
 /// \{
 
 public:
 
-	typedef std::map<CL_String, CL_String> Parameters;
+	typedef std::map<std::string, std::string> Parameters;
 
 	/// \brief Constructs a PgsqlConnection
 	///
 	/// \param parameters = List of std::paire<Key, Value>
-	CL_PgsqlConnection(const Parameters &parameters);
+	PgsqlConnection(const Parameters &parameters);
 
 	/// \brief Constructs a PgsqlConnection
 	///
 	/// \param connection_string = Parameters as a string.
 	///        If empty, default parameters are used.
 	///        It could be a connection uri. (see libpq-connect documentation)
-	CL_PgsqlConnection(const CL_String &connecton_tring);
+	PgsqlConnection(const std::string &connecton_tring);
 
-	~CL_PgsqlConnection();
+	~PgsqlConnection();
 
 /// \}
 /// \name Attributes
@@ -80,5 +85,7 @@ public:
 private:
 /// \}
 };
+
+}; // namespace clan
 
 /// \}

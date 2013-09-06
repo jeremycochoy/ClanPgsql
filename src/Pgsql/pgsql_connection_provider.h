@@ -37,20 +37,23 @@
 #include "ClanLib/Pgsql/pgsql_connection.h"
 #include "ClanLib/Database/db_connection_provider.h"
 
-class CL_PgsqlTransactionProvider;
-class CL_PgsqlReaderProvider;
+namespace clan
+{
+
+class PgsqlTransactionProvider;
+class PgsqlReaderProvider;
 
 /// \brief Sqlite database connection provider
-class CL_PgsqlConnectionProvider : public CL_DBConnectionProvider
+class PgsqlConnectionProvider : public DBConnectionProvider
 {
 /// \name Construction
 /// \{
 public:
-	typedef CL_PgsqlConnection::Parameters Parameters;
+	typedef PgsqlConnection::Parameters Parameters;
 
-	CL_PgsqlConnectionProvider(const Parameters &parameters);
-	CL_PgsqlConnectionProvider(const CL_String &connecton_tring);
-	~CL_PgsqlConnectionProvider();
+	PgsqlConnectionProvider(const Parameters &parameters);
+	PgsqlConnectionProvider(const std::string &connecton_tring);
+	~PgsqlConnectionProvider();
 /// \}
 
 /// \name Attributes
@@ -61,28 +64,29 @@ public:
 /// \name Operations
 /// \{
 public:
-	CL_DBCommandProvider *create_command(const CL_StringRef &text, CL_DBCommand::Type type);
-	CL_DBTransactionProvider *begin_transaction(CL_DBTransaction::Type type);
-	CL_DBReaderProvider *execute_reader(CL_DBCommandProvider *command);
-	CL_String execute_scalar_string(CL_DBCommandProvider *command);
-	int execute_scalar_int(CL_DBCommandProvider *command);
-	void execute_non_query(CL_DBCommandProvider *command);
+	DBCommandProvider *create_command(const std::string &text, DBCommand::Type type);
+	DBTransactionProvider *begin_transaction(DBTransaction::Type type);
+	DBReaderProvider *execute_reader(DBCommandProvider *command);
+	std::string execute_scalar_string(DBCommandProvider *command);
+	int execute_scalar_int(DBCommandProvider *command);
+	void execute_non_query(DBCommandProvider *command);
 /// \}
 
 /// \name Implementation
 /// \{
 private:
-	static CL_String to_sql_datetime(const CL_DateTime &value);
-	static CL_DateTime from_sql_datetime(const CL_String &value);
+	static std::string to_sql_datetime(const DateTime &value);
+	static DateTime from_sql_datetime(const std::string &value);
 
 	PGconn *db;
-	CL_PgsqlTransactionProvider *active_transaction;
+	PgsqlTransactionProvider *active_transaction;
 
-	friend class CL_PgsqlReaderProvider;
-	friend class CL_PgsqlTransactionProvider;
-	friend class CL_PgsqlCommandProvider;
+	friend class PgsqlReaderProvider;
+	friend class PgsqlTransactionProvider;
+	friend class PgsqlCommandProvider;
 /// \}
 };
 
+}; // namespace clan
 
 /// \}

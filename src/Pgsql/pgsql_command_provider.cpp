@@ -26,6 +26,8 @@
 **    Jeremy Cochoy
 */
 
+#include <memory>
+
 #include "Pgsql/precomp.h"
 #include "pg_type.h"
 #include "pgsql_command_provider.h"
@@ -38,90 +40,93 @@
 #include <libpq-fe.h>
 #include <sstream>
 
-/////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlCommandProvider Construction:
+namespace clan
+{
 
-CL_PgsqlCommandProvider::CL_PgsqlCommandProvider(CL_PgsqlConnectionProvider *connection, const CL_StringRef &user_text)
+/////////////////////////////////////////////////////////////////////////////
+// PgsqlCommandProvider Construction:
+
+PgsqlCommandProvider::PgsqlCommandProvider(PgsqlConnectionProvider *connection, const std::string &user_text)
 : connection(connection), last_insert_rowid(-1)
 {
 	text = compute_command(user_text, arguments_count);
 	arguments.resize(arguments_count);
 }
 
-CL_PgsqlCommandProvider::~CL_PgsqlCommandProvider()
+PgsqlCommandProvider::~PgsqlCommandProvider()
 {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlCommandProvider Attributes:
+// PgsqlCommandProvider Attributes:
 
-int CL_PgsqlCommandProvider::get_input_parameter_column(const CL_StringRef &name) const
+int PgsqlCommandProvider::get_input_parameter_column(const std::string &name) const
 {
-	throw CL_Exception("get_input_parameter_column not yet implemented for PostgreSQL");
+	throw Exception("get_input_parameter_column not yet implemented for PostgreSQL");
 }
 
-int CL_PgsqlCommandProvider::get_output_last_insert_rowid() const
+int PgsqlCommandProvider::get_output_last_insert_rowid() const
 {
 	return last_insert_rowid;
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlCommandProvider Operations:
+// PgsqlCommandProvider Operations:
 
-void CL_PgsqlCommandProvider::set_input_parameter_string(int index, const CL_StringRef &value)
+void PgsqlCommandProvider::set_input_parameter_string(int index, const std::string &value)
 {
-	put(index, CL_String(value));
+	put(index, std::string(value));
 }
 
-void CL_PgsqlCommandProvider::set_input_parameter_bool(int index, bool value)
+void PgsqlCommandProvider::set_input_parameter_bool(int index, bool value)
 {
-	put(index, CL_StringHelp::bool_to_text(value));
+	put(index, StringHelp::bool_to_text(value));
 }
 
-void CL_PgsqlCommandProvider::set_input_parameter_int(int index, int value)
+void PgsqlCommandProvider::set_input_parameter_int(int index, int value)
 {
-	put(index, CL_StringHelp::int_to_text(value));
+	put(index, StringHelp::int_to_text(value));
 }
 
-void CL_PgsqlCommandProvider::set_input_parameter_double(int index, double value)
+void PgsqlCommandProvider::set_input_parameter_double(int index, double value)
 {
-	put(index, CL_StringHelp::double_to_text(value));
+	put(index, StringHelp::double_to_text(value));
 }
 
-void CL_PgsqlCommandProvider::set_input_parameter_datetime(int index, const CL_DateTime &value)
+void PgsqlCommandProvider::set_input_parameter_datetime(int index, const DateTime &value)
 {
-	put(index, CL_PgsqlConnectionProvider::to_sql_datetime(value));
+	put(index, PgsqlConnectionProvider::to_sql_datetime(value));
 }
 
-void CL_PgsqlCommandProvider::set_input_parameter_binary(int index, const CL_DataBuffer &value)
+void PgsqlCommandProvider::set_input_parameter_binary(int index, const DataBuffer &value)
 {
 	put(index, value);
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlCommandProvider Implementation:
+// PgsqlCommandProvider Implementation:
 inline
-void CL_PgsqlCommandProvider::put(int index, const CL_String &value)
+void PgsqlCommandProvider::put(int index, const std::string &value)
 {
 	if (index > arguments_count)
-		throw CL_Exception("Index out of range");
+		throw Exception("Index out of range");
 	arguments[index - 1] = value;
 	bin_arguments.erase(index);
 }
 
 inline
-void CL_PgsqlCommandProvider::put(int index, const CL_DataBuffer &value)
+void PgsqlCommandProvider::put(int index, const DataBuffer &value)
 {
 	if (index < 1 || index > arguments_count)
-		throw CL_Exception("Index out of range");
+		throw Exception("Index out of range");
 	last_insert_rowid = index;
 	arguments[index - 1] = "";
 	bin_arguments[index - 1] = value;
 }
 
-CL_String CL_PgsqlCommandProvider::compute_command(const CL_String &text, int &arguments_count) const
+std::string PgsqlCommandProvider::compute_command(const std::string &text, int &arguments_count) const
 {
-	CL_String out;
+	std::string out;
 	int arguments = 0;
 	for (auto c : text)
 	{
@@ -137,12 +142,12 @@ CL_String CL_PgsqlCommandProvider::compute_command(const CL_String &text, int &a
 	return out;
 }
 
-PGresult *CL_PgsqlCommandProvider::exec_command()
+PGresult *PgsqlCommandProvider::exec_command()
 {
-	CL_UniquePtr<const char*[]> values(new const char*[arguments_count + 1]);
-	CL_UniquePtr<Oid[]>  types(new Oid[arguments_count + 1]);
-	CL_UniquePtr<int[]>  formats(new int[arguments_count + 1]);
-	CL_UniquePtr<int[]>  lengths(new int[arguments_count + 1]);
+	std::unique_ptr<const char*[]> values(new const char*[arguments_count + 1]);
+	std::unique_ptr<Oid[]>  types(new Oid[arguments_count + 1]);
+	std::unique_ptr<int[]>  formats(new int[arguments_count + 1]);
+	std::unique_ptr<int[]>  lengths(new int[arguments_count + 1]);
 
 	for (int i = 0; i < arguments_count; i++)
 	{
@@ -181,3 +186,5 @@ PGresult *CL_PgsqlCommandProvider::exec_command()
 			formats.get(),
 			0); //Text output format
 }
+
+};

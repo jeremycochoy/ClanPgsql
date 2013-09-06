@@ -26,6 +26,8 @@
 **    Jeremy Cochoy
 */
 
+#include <memory>
+
 #include "Pgsql/precomp.h"
 #include "pgsql_connection_provider.h"
 #include "pgsql_command_provider.h"
@@ -33,21 +35,21 @@
 #include "pgsql_transaction_provider.h"
 #include "ClanLib/Core/System/databuffer.h"
 #include "ClanLib/Core/System/datetime.h"
-#include "ClanLib/Core/System/uniqueptr.h"
 #include "ClanLib/Core/Text/string_help.h"
 #include "ClanLib/Core/Text/string_format.h"
 
-#include <memory>
+namespace clan
+{
 
 /////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlConnectionProvider Construction:
+// PgsqlConnectionProvider Construction:
 
-CL_PgsqlConnectionProvider::CL_PgsqlConnectionProvider(const Parameters &parameters)
+PgsqlConnectionProvider::PgsqlConnectionProvider(const Parameters &parameters)
 : db(nullptr), active_transaction(nullptr)
 {
 	const int length = parameters.size() + 1;
-	CL_UniquePtr<const char*[]> keywords(new const char*[length]);
-	CL_UniquePtr<const char*[]> values(new const char*[length]);
+	std::unique_ptr<const char*[]> keywords(new const char*[length]);
+	std::unique_ptr<const char*[]> values(new const char*[length]);
 
   int i = 0;
   for (auto pair : parameters)
@@ -63,22 +65,22 @@ CL_PgsqlConnectionProvider::CL_PgsqlConnectionProvider(const Parameters &paramet
 	if (PQstatus(db) == CONNECTION_BAD)
 	{
 		PQfinish(db);
-		throw CL_Exception("Unable to open database");
+		throw Exception("Unable to open database");
 	}
 }
 
-CL_PgsqlConnectionProvider::CL_PgsqlConnectionProvider(const CL_String &connection_string)
+PgsqlConnectionProvider::PgsqlConnectionProvider(const std::string &connection_string)
 : db(nullptr), active_transaction(nullptr)
 {
 	db = PQconnectdb(connection_string.c_str());
 	if (PQstatus(db) == CONNECTION_BAD)
 	{
 		PQfinish(db);
-		throw CL_Exception("Unable to open database");
+		throw Exception("Unable to open database");
 	}
 }
 
-CL_PgsqlConnectionProvider::~CL_PgsqlConnectionProvider()
+PgsqlConnectionProvider::~PgsqlConnectionProvider()
 {
 	if (active_transaction)
 		active_transaction->rollback();
@@ -86,62 +88,64 @@ CL_PgsqlConnectionProvider::~CL_PgsqlConnectionProvider()
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlConnectionProvider Attributes:
+// PgsqlConnectionProvider Attributes:
 
 
 /////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlConnectionProvider Operations:
+// PgsqlConnectionProvider Operations:
 
-CL_DBCommandProvider *CL_PgsqlConnectionProvider::create_command(const CL_StringRef &text, CL_DBCommand::Type type)
+DBCommandProvider *PgsqlConnectionProvider::create_command(const std::string &text, DBCommand::Type type)
 {
-	if (type != CL_DBCommand::sql_statement)
-		throw CL_Exception("DBCommand::sql_statement not yet implemented");
+	if (type != DBCommand::sql_statement)
+		throw Exception("DBCommand::sql_statement not yet implemented");
 	else
-		return new CL_PgsqlCommandProvider(this, text);
+		return new PgsqlCommandProvider(this, text);
 }
 
-CL_DBTransactionProvider *CL_PgsqlConnectionProvider::begin_transaction(CL_DBTransaction::Type type)
+DBTransactionProvider *PgsqlConnectionProvider::begin_transaction(DBTransaction::Type type)
 {
-	return new CL_PgsqlTransactionProvider(this, type);
+	return new PgsqlTransactionProvider(this, type);
 }
 
-CL_DBReaderProvider *CL_PgsqlConnectionProvider::execute_reader(CL_DBCommandProvider *command)
+DBReaderProvider *PgsqlConnectionProvider::execute_reader(DBCommandProvider *command)
 {
-	return new CL_PgsqlReaderProvider(this, dynamic_cast<CL_PgsqlCommandProvider*>(command));
+	return new PgsqlReaderProvider(this, dynamic_cast<PgsqlCommandProvider*>(command));
 }
 
-CL_String CL_PgsqlConnectionProvider::execute_scalar_string(CL_DBCommandProvider *command)
+std::string PgsqlConnectionProvider::execute_scalar_string(DBCommandProvider *command)
 {
-	CL_UniquePtr<CL_DBReaderProvider> reader(execute_reader(command));
+	std::unique_ptr<DBReaderProvider> reader(execute_reader(command));
 	if (!reader->retrieve_row())
-		throw CL_Exception("Database command statement returned no value");
-	CL_String value = reader->get_column_string(0);
+		throw Exception("Database command statement returned no value");
+	std::string value = reader->get_column_string(0);
 	return value;
 }
 
-int CL_PgsqlConnectionProvider::execute_scalar_int(CL_DBCommandProvider *command)
+int PgsqlConnectionProvider::execute_scalar_int(DBCommandProvider *command)
 {
-	CL_UniquePtr<CL_DBReaderProvider> reader(execute_reader(command));
+	std::unique_ptr<DBReaderProvider> reader(execute_reader(command));
 	if (!reader->retrieve_row())
-		throw CL_Exception("Database command statement returned no value");
+		throw Exception("Database command statement returned no value");
 	int value = reader->get_column_int(0);
 	return value;
 }
 
-void CL_PgsqlConnectionProvider::execute_non_query(CL_DBCommandProvider *command)
+void PgsqlConnectionProvider::execute_non_query(DBCommandProvider *command)
 {
-	CL_UniquePtr<CL_DBReaderProvider> reader(execute_reader(command));
+	std::unique_ptr<DBReaderProvider> reader(execute_reader(command));
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlConnectionProvider Implementation:
+// PgsqlConnectionProvider Implementation:
 
-CL_String CL_PgsqlConnectionProvider::to_sql_datetime(const CL_DateTime &value)
+std::string PgsqlConnectionProvider::to_sql_datetime(const DateTime &value)
 {
 	return value.to_short_datetime_string();
 }
 
-CL_DateTime CL_PgsqlConnectionProvider::from_sql_datetime(const CL_String &value)
+DateTime PgsqlConnectionProvider::from_sql_datetime(const std::string &value)
 {
-	return CL_DateTime::from_short_date_string(value);
+	return DateTime::from_short_date_string(value);
 }
+
+}; // namespace clan

@@ -32,20 +32,25 @@
 
 #pragma once
 
+#include <memory>
+
 #include <libpq-fe.h>
 #include "ClanLib/Database/db_transaction.h"
 #include "ClanLib/Database/db_transaction_provider.h"
 
-class CL_PgsqlConnectionProvider;
+namespace clan
+{
+
+class PgsqlConnectionProvider;
 
 /// \brief Pgsql database transaction provider.
-class CL_PgsqlTransactionProvider : public CL_DBTransactionProvider
+class PgsqlTransactionProvider : public DBTransactionProvider
 {
 /// \name Construction
 /// \{
 public:
-	CL_PgsqlTransactionProvider(CL_PgsqlConnectionProvider *connection, CL_DBTransaction::Type type);
-	~CL_PgsqlTransactionProvider();
+	PgsqlTransactionProvider(PgsqlConnectionProvider *connection, DBTransaction::Type type);
+	~PgsqlTransactionProvider();
 /// \}
 
 /// \name Attributes
@@ -63,13 +68,14 @@ public:
 /// \name Implementation
 /// \{
 private:
-	CL_PgsqlConnectionProvider *connection;
-	CL_DBTransaction::Type type;
-	inline void execute(const CL_String &cmd);
+	PgsqlConnectionProvider *connection;
+	DBTransaction::Type type;
+inline void execute(const std::string &cmd);
 
-	friend class CL_PgsqlConnectionProvider;
+	friend class PgsqlConnectionProvider;
 /// \}
 };
 
+}; // namespace clan
 
 /// \}

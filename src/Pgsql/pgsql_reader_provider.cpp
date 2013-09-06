@@ -26,6 +26,8 @@
 **    Jeremy Cochoy
 */
 
+#include <memory>
+
 #include "Pgsql/precomp.h"
 #include "pgsql_reader_provider.h"
 #include "pgsql_connection_provider.h"
@@ -37,20 +39,22 @@
 #include <libpq-fe.h>
 #include <cstdlib>
 
+namespace clan
+{
 /////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlReaderProvider Construction:
+// PgsqlReaderProvider Construction:
 
-CL_PgsqlReaderProvider::CL_PgsqlReaderProvider(CL_PgsqlConnectionProvider *connection, CL_PgsqlCommandProvider *command)
+PgsqlReaderProvider::PgsqlReaderProvider(PgsqlConnectionProvider *connection, PgsqlCommandProvider *command)
     : connection(connection), command(command), closed(false), current_row(-1)
 {
 	auto deleter = [](PGresult *ptr) {if (ptr) {PQclear(ptr);} };
-	CL_UniquePtr<PGresult, decltype(deleter)> result_uniqueptr(command->exec_command(), deleter);
+	std::unique_ptr<PGresult, decltype(deleter)> result_uniqueptr(command->exec_command(), deleter);
 	result = result_uniqueptr.get();
 
 	switch (PQresultStatus(result))
 	{
 	case PGRES_EMPTY_QUERY:
-		throw CL_Exception("Empty query");
+		throw Exception("Empty query");
 
 	case PGRES_COMMAND_OK:
 		type = ResultType::EMPTY_RESULT;
@@ -60,48 +64,48 @@ CL_PgsqlReaderProvider::CL_PgsqlReaderProvider(CL_PgsqlConnectionProvider *conne
 		break;
 
 	case PGRES_NONFATAL_ERROR:
-		throw CL_Exception("Server gave an unknow answer");
+		throw Exception("Server gave an unknow answer");
 
 	case PGRES_FATAL_ERROR:
-		throw CL_Exception(PQerrorMessage(connection->db));
+		throw Exception(PQerrorMessage(connection->db));
 
 	default:
-		throw CL_Exception(CL_StringHelp::text_to_local8(PQresultErrorMessage(result)));
+		throw Exception(StringHelp::text_to_local8(PQresultErrorMessage(result)));
 	}
 	nb_rows = PQntuples(result);
 	result_uniqueptr.release();
 }
 
-CL_PgsqlReaderProvider::~CL_PgsqlReaderProvider()
+PgsqlReaderProvider::~PgsqlReaderProvider()
 {
 	close();
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlReaderProvider Attributes:
+// PgsqlReaderProvider Attributes:
 
-int CL_PgsqlReaderProvider::get_column_count() const
+int PgsqlReaderProvider::get_column_count() const
 {
 	return  PQnfields(result);
 }
 
-CL_String CL_PgsqlReaderProvider::get_column_name(int index) const
+std::string PgsqlReaderProvider::get_column_name(int index) const
 {
 	const char *const string = PQfname(result, index);
 	if (string == nullptr)
 		throw ("Index out of range");
-	return CL_String(string);
+	return std::string(string);
 }
 
-int CL_PgsqlReaderProvider::get_name_index(const CL_StringRef &name) const
+int PgsqlReaderProvider::get_name_index(const std::string &name) const
 {
 	int index = PQfnumber(result, name.c_str());
 	if (index < 0)
-		throw CL_Exception(cl_format("No such column name %1", name));
+		throw Exception(string_format("No such column name %1", name));
 	return index;
 }
 
-CL_String CL_PgsqlReaderProvider::get_column_string(int index) const
+std::string PgsqlReaderProvider::get_column_string(int index) const
 {
 	const char *const str = PQgetvalue(result, current_row, index);
 	if (str != nullptr)
@@ -110,66 +114,66 @@ CL_String CL_PgsqlReaderProvider::get_column_string(int index) const
 		throw ("Index out of range");
 }
 
-bool CL_PgsqlReaderProvider::get_column_bool(int index) const
+bool PgsqlReaderProvider::get_column_bool(int index) const
 {
-	const CL_String value = get_column_string(index);
-	return CL_StringHelp::text_to_bool(value);
+	const std::string value = get_column_string(index);
+	return StringHelp::text_to_bool(value);
 }
 
-char CL_PgsqlReaderProvider::get_column_char(int index) const
+char PgsqlReaderProvider::get_column_char(int index) const
 {
-	const CL_String value = get_column_string(index);
-	return static_cast<int>(CL_StringHelp::text_to_int(value));
+	const std::string value = get_column_string(index);
+	return static_cast<int>(StringHelp::text_to_int(value));
 }
 
-unsigned char CL_PgsqlReaderProvider::get_column_uchar(int index) const
+unsigned char PgsqlReaderProvider::get_column_uchar(int index) const
 {
-	const CL_String value = get_column_string(index);
-	return static_cast<unsigned char>(CL_StringHelp::text_to_uint(value));
+	const std::string value = get_column_string(index);
+	return static_cast<unsigned char>(StringHelp::text_to_uint(value));
 }
 
-int CL_PgsqlReaderProvider::get_column_int(int index) const
+int PgsqlReaderProvider::get_column_int(int index) const
 {
-	const CL_String value = get_column_string(index);
-	return CL_StringHelp::text_to_int(value);
+	const std::string value = get_column_string(index);
+	return StringHelp::text_to_int(value);
 }
 
-unsigned int CL_PgsqlReaderProvider::get_column_uint(int index) const
+unsigned int PgsqlReaderProvider::get_column_uint(int index) const
 {
-	const CL_String value = get_column_string(index);
-	return CL_StringHelp::text_to_uint(value);
+	const std::string value = get_column_string(index);
+	return StringHelp::text_to_uint(value);
 }
 
-double CL_PgsqlReaderProvider::get_column_double(int index) const
+double PgsqlReaderProvider::get_column_double(int index) const
 {
-	const CL_String value = get_column_string(index);
-	return CL_StringHelp::text_to_double(value);
+	const std::string value = get_column_string(index);
+	return StringHelp::text_to_double(value);
 }
 
-CL_DateTime CL_PgsqlReaderProvider::get_column_datetime(int index) const
+DateTime PgsqlReaderProvider::get_column_datetime(int index) const
 {
-	return CL_PgsqlConnectionProvider::from_sql_datetime(get_column_string(index));
+	return PgsqlConnectionProvider::from_sql_datetime(get_column_string(index));
 }
 
-CL_DataBuffer CL_PgsqlReaderProvider::get_column_binary(int index) const
+DataBuffer PgsqlReaderProvider::get_column_binary(int index) const
 {
 	const unsigned char *const str = reinterpret_cast<unsigned char*>(PQgetvalue(result, current_row, index));
 	if (str == nullptr)
 		throw ("Index out of range");
 	size_t length;
 	auto deleter = [](void *ptr) {if (ptr) {free(ptr);} };
-	CL_UniquePtr<unsigned char, decltype(deleter)> value(PQunescapeBytea(
+	std::unique_ptr<unsigned char, decltype(deleter)> value(PQunescapeBytea(
 				str,
 				&length),
 				deleter);
-	CL_DataBuffer output(value.get(), length);
+	DataBuffer output(value.get(), length);
 	return output;
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlReaderProvider Operations:
+// PgsqlReaderProvider Operations:
 
-bool CL_PgsqlReaderProvider::retrieve_row()
+bool PgsqlReaderProvider::retrieve_row()
 {
 	if (1 + current_row >= nb_rows)
 		return false;
@@ -177,7 +181,7 @@ bool CL_PgsqlReaderProvider::retrieve_row()
 	return true;
 }
 
-void CL_PgsqlReaderProvider::close()
+void PgsqlReaderProvider::close()
 {
 	if (!closed)
 	{
@@ -188,4 +192,6 @@ void CL_PgsqlReaderProvider::close()
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// CL_PgsqlReaderProvider Implementation:
+// PgsqlReaderProvider Implementation:
+
+}; //namespace clan

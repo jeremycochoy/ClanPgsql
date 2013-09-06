@@ -37,60 +37,63 @@
 
 #include <libpq-fe.h>
 #include "ClanLib/Database/db_command_provider.h"
-#include "ClanLib/Core/System/uniqueptr.h"
 #include "ClanLib/Core/System/databuffer.h"
 
-class CL_PgsqlConnectionProvider;
+namespace clan
+{
+
+class PgsqlConnectionProvider;
 
 /// \brief Pgsql database command provider.
-class CL_PgsqlCommandProvider : public CL_DBCommandProvider
+class PgsqlCommandProvider : public DBCommandProvider
 {
 /// \name Construction
 /// \{
 public:
-	CL_PgsqlCommandProvider(CL_PgsqlConnectionProvider *connection, const CL_StringRef &text);
-	~CL_PgsqlCommandProvider();
+	PgsqlCommandProvider(PgsqlConnectionProvider *connection, const std::string &text);
+	~PgsqlCommandProvider();
 /// \}
 
 /// \name Attributes
 /// \{
 public:
-	int get_input_parameter_column(const CL_StringRef &name) const;
+	int get_input_parameter_column(const std::string &name) const;
 	int get_output_last_insert_rowid() const;
 /// \}
 
 /// \name Operations
 /// \{
 public:
-	void set_input_parameter_string(int index, const CL_StringRef &value);
+	void set_input_parameter_string(int index, const std::string &value);
 	void set_input_parameter_bool(int index, bool value);
 	void set_input_parameter_int(int index, int value);
 	void set_input_parameter_double(int index, double value);
-	void set_input_parameter_datetime(int index, const CL_DateTime &value);
-	void set_input_parameter_binary(int index, const CL_DataBuffer &value);
+	void set_input_parameter_datetime(int index, const DateTime &value);
+	void set_input_parameter_binary(int index, const DataBuffer &value);
 /// \}
 
 /// \name Implementation
 /// \{
 private:
 	/// \brief Replace each '?' by a '$i' where i is the occurence of '?'.
-	CL_String compute_command(const CL_String &text, int &arguments_count) const;
+	std::string compute_command(const std::string &text, int &arguments_count) const;
 
-	inline void put(int index, const CL_DataBuffer &value);
-	inline void put(int index, const CL_String &value);
+	inline void put(int index, const DataBuffer &value);
+	inline void put(int index, const std::string &value);
 
-	CL_PgsqlConnectionProvider *connection;
-	CL_String text;
+	PgsqlConnectionProvider *connection;
+	std::string text;
 	int last_insert_rowid;
 	int arguments_count;
-	std::vector<CL_String> arguments;
-	std::map<int, CL_DataBuffer> bin_arguments;
+	std::vector<std::string> arguments;
+	std::map<int, DataBuffer> bin_arguments;
 
 	PGresult *exec_command();
 
-	friend class CL_PgsqlReaderProvider;
+	friend class PgsqlReaderProvider;
 /// \}
 };
 
+}; // namespace clan
 
 /// \}
